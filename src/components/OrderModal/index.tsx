@@ -11,18 +11,11 @@ interface OrderModal {
 }
 
 export default function OrderModal ({ isVisible, order, onCloseModal } : OrderModal){
-
-	if(!isVisible || !order){
-		return null;
-	}
-
 	useEffect(() => {
 		function handleCloseModal(event : KeyboardEvent) {
 			if(event.key === 'Escape') {
 				onCloseModal();
 			}
-
-			return;
 		}
 
 		document.addEventListener('keyup', handleCloseModal);
@@ -31,6 +24,10 @@ export default function OrderModal ({ isVisible, order, onCloseModal } : OrderMo
 			document.removeEventListener('keyup', handleCloseModal);
 		};
 	},[onCloseModal]);
+
+	if(!isVisible || !order){
+		return null;
+	}
 
 	const total = order.products.reduce(
 		(accumulator, { product, quantity }) => {
