@@ -35,7 +35,6 @@ export default function OrdersBoard({ icon, title, orders, onCancelOrder, onChan
 			? 'IN_PRODUCTION'
 			: 'DONE';
 
-		await new Promise((resolve) => setTimeout(resolve, 3000));
 		await api.patch(`/orders/${selectedOrder?._id}`, { status: newStatus });
 
 		onChangeOrderStatus(selectedOrder!._id, newStatus);
@@ -47,7 +46,6 @@ export default function OrdersBoard({ icon, title, orders, onCancelOrder, onChan
 	async function handleCancelOrder() {
 		setIsLoading(true);
 
-		await new Promise((resolve) => setTimeout(resolve, 3000));
 		await api.delete(`/orders/${selectedOrder?._id}`);
 
 		onCancelOrder(selectedOrder!._id);
