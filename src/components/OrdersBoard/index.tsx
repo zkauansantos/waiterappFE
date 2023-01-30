@@ -1,27 +1,61 @@
 import { Board, OrdersContainer } from './styles';
 import { Order } from '../../types/Order';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import OrderModal from '../OrderModal';
+import { api } from '../../utils/api';
+import { toast } from 'react-toastify';
 
 interface OrdersBoardProps {
 	icon: string,
 	title:string,
 	orders: Order[],
+	onCancelOrder(orderId: string): void,
+	onChangeOrderStatus(orderId: string, status: Order['status']): void
 }
 
-export default function OrdersBoard({ icon, title, orders } :OrdersBoardProps) {
+export default function OrdersBoard({ icon, title, orders, onCancelOrder, onChangeOrderStatus } :OrdersBoardProps) {
 	const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 	const [selectedOrder, setSelectedOrder] = useState<null | Order>(null);
+	const [isLoading, setIsLoading] = useState(false);
 
 	function handleOpenModal(order: Order){
 		setIsModalVisible(true);
 		setSelectedOrder(order);
 	}
 
-	const handleCloseModal = useCallback(() =>{
+	function handleCloseModal() {
 		setIsModalVisible(false);
 		setSelectedOrder(null);
-	}, []);
+	}
+
+	async function handleChanceOrderStatus(){
+		setIsLoading(true);
+
+		const newStatus = selectedOrder?.status === 'WAITING'
+			? 'IN_PRODUCTION'
+			: 'DONE';
+
+		await new Promise((resolve) => setTimeout(resolve, 3000));
+		await api.patch(`/orders/${selectedOrder?._id}`, { status: newStatus });
+
+		onChangeOrderStatus(selectedOrder!._id, newStatus);
+		setIsLoading(false);
+		setIsModalVisible(false);
+		toast.success(`O status do pedido da mesa ${selectedOrder?.table} foi alterado com sucesso`);
+	}
+
+	async function handleCancelOrder() {
+		setIsLoading(true);
+
+		await new Promise((resolve) => setTimeout(resolve, 3000));
+		await api.delete(`/orders/${selectedOrder?._id}`);
+
+		onCancelOrder(selectedOrder!._id);
+		setIsLoading(false);
+		setIsModalVisible(false);
+		toast.success(`O pedido da mesa ${selectedOrder?.table} foi cancelado com sucesso`);
+
+	}
 
 	return (
 		<Board>
@@ -45,8 +79,11 @@ export default function OrdersBoard({ icon, title, orders } :OrdersBoardProps) {
 			</OrdersContainer>}
 
 			<OrderModal
+				onChangeOrderStatus={handleChanceOrderStatus}
 				onCloseModal={handleCloseModal}
+				onCancelOrder={handleCancelOrder}
 				isVisible={isModalVisible}
+				isLoading={isLoading}
 				order={selectedOrder}
 			/>
 		</Board>

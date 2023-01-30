@@ -6,11 +6,22 @@ import { useEffect } from 'react';
 
 interface OrderModal {
 	isVisible: boolean,
-	order : Order | null
+	isLoading: boolean,
+	order : Order | null,
 	onCloseModal():  void,
+	onCancelOrder(): void,
+	onChangeOrderStatus(): void,
 }
 
-export default function OrderModal ({ isVisible, order, onCloseModal } : OrderModal){
+export default function OrderModal ({
+	isVisible,
+	isLoading,
+	order,
+	onCloseModal,
+	onCancelOrder,
+	onChangeOrderStatus,
+} : OrderModal)
+{
 	useEffect(() => {
 		function handleCloseModal(event : KeyboardEvent) {
 			if(event.key === 'Escape') {
@@ -33,7 +44,6 @@ export default function OrderModal ({ isVisible, order, onCloseModal } : OrderMo
 		(accumulator, { product, quantity }) => {
 			return accumulator + (product.price * quantity);
 		}, 0);
-
 
 	return (
 		<Overlay>
@@ -90,15 +100,27 @@ export default function OrderModal ({ isVisible, order, onCloseModal } : OrderMo
 					</div>
 				</ContainerOrderDetails>
 				<Actions>
-					<button type='button' className='primary'>
-						<span>🧑‍🍳</span>
-						<strong>Iniciar Produção</strong>
-					</button>
+					{order.status !== 'DONE' &&  <button
+						type='button'
+						className='primary'
+						disabled={isLoading}
+						onClick={onChangeOrderStatus}
+					>
+						<span>
+							{order.status === 'WAITING' && '🧑‍🍳'}
+							{order.status === 'IN_PRODUCTION' && '✅'}
+						</span>
+						<strong>
+							{order.status === 'WAITING' && 'Iniciar Produção'}
+							{order.status === 'IN_PRODUCTION' && 'Concluir pedido'}
+						</strong>
+					</button>}
 
 					<button
 						type='button'
 						className='secondary'
-						onClick={() => onCloseModal()}
+						onClick={onCancelOrder}
+						disabled={isLoading}
 					>
 						Cancelar Pedido
 					</button>

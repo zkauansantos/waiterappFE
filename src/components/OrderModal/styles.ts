@@ -131,6 +131,11 @@ export const Actions = styled.footer`
 		padding: 12px 24px;
 	}
 
+	button:disabled{
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
 	.primary {
 		display: flex;
 		gap: 8px;
